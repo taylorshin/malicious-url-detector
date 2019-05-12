@@ -19,12 +19,39 @@ def load_data(filename):
 
     return X_train, X_test, y_train, y_test
 
+def get_tokens(url):
+    """
+    Tokenize the given URL
+    """
+    tokens_all = []
+    # Split tokens by slash
+    tokens_slash = url.split('/')
+    tokens_slash = list(filter(None, tokens_slash))
+    print('Tokens by slash: ', tokens_slash)
+    for ts in tokens_slash:
+        tokens_dash = ts.split('-')
+        print('Tokens by dash: ', tokens_dash)
+        for td in tokens_dash:
+            tokens_dot = td.split('.')
+            tokens_all = tokens_all + tokens_dot
+    # Remove redundant tokens
+    tokens_all = list(set(tokens_all))
+    # Remove .com
+    if 'com' in tokens_all:
+        tokens_all.remove('com')
+        
+    return tokens_all
+
 def main():
     X_train, X_test, y_train, y_test = load_data('data.csv')
     print('X_train: ', X_train.shape)
     print('X_test: ', X_test.shape)
     print('y_train: ', y_train.shape)
     print('y_test: ', y_test.shape)
+    test = X_train[0]
+    print('Test URLs: ', test)
+    tokens = get_tokens(test)
+    print('TOKENS: ', tokens)
 
 
 if __name__ == '__main__':
