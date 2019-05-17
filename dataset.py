@@ -64,7 +64,7 @@ def viterbi_segment(text):
     words.reverse()
     return words, probs[-1]
 
-def word_prob(word): return dictionary[word] / total
+def word_prob(word): return dictionary[word] / total # This works because of global variables, but should adjust
 
 def words(text): return re.findall('[a-z]+', text.lower())
 
