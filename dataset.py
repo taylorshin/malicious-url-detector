@@ -1,5 +1,7 @@
+import re
 import numpy as np
 import pandas as pd
+from collections import Counter
 from sklearn.model_selection import train_test_split
 
 def load_data(filename):
@@ -44,12 +46,11 @@ def get_tokens(url):
 
     return tokens_all
 
-# Taken from Stack Overflow: https://stackoverflow.com/questions/195010/how-can-i-split-multiple-joined-words
-# Requires English dictionary from https://github.com/dwyl/english-words or similar
-import re
-from collections import Counter
-
 def viterbi_segment(text):
+    """
+    Taken from Stack Overflow: https://stackoverflow.com/questions/195010/how-can-i-split-multiple-joined-words
+    Requires English dictionary from https://github.com/dwyl/english-words or similar
+    """
     probs, lasts = [1.0], [0]
     for i in range(1, len(text) + 1):
         prob_k, k = max((probs[j] * word_prob(text[j:i]), j)
@@ -68,7 +69,7 @@ def word_prob(word): return dictionary[word] / total # This works because of glo
 
 def words(text): return re.findall('[a-z]+', text.lower())
 
-dictionary = Counter(words(open('dict.txt').read()))
+dictionary = Counter(words(open('words.txt').read()))
 max_word_length = max(map(len, dictionary))
 total = float(sum(dictionary.values()))
 # End stealing from SO
