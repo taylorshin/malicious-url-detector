@@ -1,3 +1,4 @@
+import os
 import argparse
 import numpy as np
 import tensorflow as tf
@@ -6,6 +7,7 @@ from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.model_selection import train_test_split
 from dataset import load_data, get_tokens
 from model import build_model
+from util import load_tokens
 
 def train():
     print('Loading and tokenizing data...')
@@ -17,7 +19,9 @@ def train():
     # vectorizer = TfidfVectorizer(tokenizer=dataset.get_tokens)
     # X = vectorizer.fit_transform(corpus)
 
-    tokens = [get_tokens(doc) for doc in corpus]
+    # Cache/load tokens
+    tokens = load_tokens(corpus)
+
     X, vocab_size, largest_vector_len = tokens_to_int_sequence(tokens)
 
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
@@ -39,12 +43,7 @@ def train():
         tf.keras.callbacks.ModelCheckpoint('out/model.h5', monitor='acc', save_best_only=True, save_weights_only=True)
     ]
 
-    model.fit(X_train, y_train, batch_size=32, epochs=10, callbacks=callbacks)
-
-    print('Evaluating...')
-    score, acc = model.evaluate(X_test, y_test, verbose=2, batch_size=32)
-    print('Score: %.2f' % score)
-    print('Validation accuracy: %.2f' % acc)
+    model.fit(X_train, y_train, batch_size=32, epochs=1, callbacks=callbacks)
 
 def tokens_to_int_sequence(tokens):
     vocab = set([token for doc in tokens for token in doc])
