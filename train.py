@@ -5,26 +5,23 @@ import tensorflow as tf
 from tensorflow.keras import layers
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.model_selection import train_test_split
-from dataset import load_data, get_tokens
+from dataset import load_data, get_tokens, load_or_get_tokens, convert_tokens_to_ints
 from model import build_model
-from util import load_tokens
 
-def train():
-    print('Loading and tokenizing data...')
+def train(batch_size, epochs):
+    print('Loading data')
     data = load_data('data.csv')
 
     y = [d[1] for d in data]
     corpus = [d[0] for d in data]
 
-    # vectorizer = TfidfVectorizer(tokenizer=dataset.get_tokens)
-    # X = vectorizer.fit_transform(corpus)
-
     # Cache/load tokens
-    tokens = load_tokens(corpus)
+    tokens = load_or_get_tokens(corpus)
 
-    X, vocab_size, largest_vector_len = tokens_to_int_sequence(tokens)
+    X, vocab_size, largest_vector_len = convert_tokens_to_ints(tokens)
 
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+    # TODO: Understand these lines of code
     X_train = tf.keras.preprocessing.sequence.pad_sequences(X_train, maxlen=largest_vector_len)
     X_test = tf.keras.preprocessing.sequence.pad_sequences(X_test, maxlen=largest_vector_len)
 
@@ -43,22 +40,12 @@ def train():
         tf.keras.callbacks.ModelCheckpoint('out/model.h5', monitor='acc', save_best_only=True, save_weights_only=True)
     ]
 
-    model.fit(X_train, y_train, batch_size=32, epochs=1, callbacks=callbacks)
-
-def tokens_to_int_sequence(tokens):
-    vocab = set([token for doc in tokens for token in doc])
-    vocab_size = len(vocab)
-    dic = {token: i for i, token in enumerate(vocab)}
-
-    largest_vector_len = 0
-    for doc in tokens:
-        if len(doc) > largest_vector_len:
-            largest_vector_len = len(doc)
-
-    int_seq = np.array([[dic[token] for token in doc] for doc in tokens])
-    return int_seq, vocab_size, largest_vector_len
+    model.fit(X_train, y_train, batch_size=batch_size, epochs=epochs, callbacks=callbacks)
 
 def logistic_regression():
+    """
+    Base case: logistic regression
+    """
     data = load_data('data.csv')
     y = [d[1] for d in data]
     corpus = [d[0] for d in data]
@@ -72,9 +59,16 @@ def logistic_regression():
 
 def main():
     parser = argparse.ArgumentParser(description='Trains the model')
+    parser.add_argument('--debug', default=False, type=bool, help='Debug mode')
+    parser.add_argument('--batch-size', default=16, type=int, help='Size of training batch')
+    parser.add_argument('--epochs', default=100, type=int, help='Number of epochs to train for')
     args = parser.parse_args()
 
-    train()
+    if args.debug:
+        # Turn on eager execution for debugging
+        tf.enable_eager_execution()
+
+    train(args.batch_size, args.epochs)
 
 if __name__ == '__main__':
     main()

@@ -1,24 +1,14 @@
-import os
-import pickle
 import numpy as np
-from dataset import get_tokens
+import tensorflow as tf
 
-TOKEN_FNAME = 'tokens.bin'
-
-def load_tokens(corpus):
-    """
-    Loads the tokens from a corpus
-    """
-    tokens = []
-
-    if os.path.isfile(TOKEN_FNAME) and os.path.exists(TOKEN_FNAME):
-        print('Token cache found.')
-        with open(TOKEN_FNAME, 'rb') as f:
-            tokens = pickle.load(f)
-    else:
-        print('Caching tokens...')
-        tokens = [get_tokens(doc) for doc in corpus]
-        with open(TOKEN_FNAME, 'wb') as f:
-            pickle.dump(tokens, f)
-
-    return tokens
+def build_or_load_model(model_dir, vocab_size, largest_vector_len, allow_load=True):
+    from model import build_model
+    model = build_model(vocab_size, largest_vector_len)
+    # model[0].summary()
+    if allow_load:
+        try:
+            model[0].load_weights(MODEL_FILE)
+            print('Loaded model from file.')
+        except:
+            print('Unable to load model from file.')
+    return model
