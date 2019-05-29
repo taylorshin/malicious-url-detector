@@ -19,9 +19,11 @@ def train(batch_size, epochs):
     tokens = load_or_get_tokens(corpus)
 
     X, vocab_size, largest_vector_len = convert_tokens_to_ints(tokens)
+    print('largest_vector_len: ', largest_vector_len)
 
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
-    # TODO: Understand these lines of code
+
+    # Use pad_sequences to standardize the lengths
     X_train = tf.keras.preprocessing.sequence.pad_sequences(X_train, maxlen=largest_vector_len)
     X_test = tf.keras.preprocessing.sequence.pad_sequences(X_test, maxlen=largest_vector_len)
 
@@ -35,6 +37,7 @@ def train(batch_size, epochs):
 
     print('Training...')
     model = build_model(vocab_size, largest_vector_len)
+    model.summary()
     
     callbacks = [
         tf.keras.callbacks.ModelCheckpoint('out/model.h5', monitor='acc', save_best_only=True, save_weights_only=True)

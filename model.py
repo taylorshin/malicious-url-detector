@@ -8,8 +8,8 @@ def build_model(vocab_size, largest_vector_len):
     # https://machinelearningmastery.com/sequence-classification-lstm-recurrent-neural-networks-python-keras/
 
     # Play with these
-    embedding_output_dim = 2
-    lstm_units = 8
+    embedding_output_dim = 16
+    lstm_units = 64
 
     # tf.logging.set_verbosity(tf.logging.ERROR)
 
