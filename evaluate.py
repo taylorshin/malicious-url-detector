@@ -10,7 +10,7 @@ MODEL_DIR = 'out/model.h5'
 def evaluate(model, X, y):
     score, acc = model.evaluate(X, y, verbose=2)#, batch_size=16)
     print('Score: %.2f' % score)
-    print('Validation accuracy: %.2f' % acc)
+    print('Validation accuracy: %.2f%%' % (acc * 100))
 
 def main():
     parser = argparse.ArgumentParser(description='Make predictions from trained model')
@@ -21,10 +21,12 @@ def main():
     data = load_data('data.csv')
     y = [d[1] for d in data]
     corpus = [d[0] for d in data]
+
     # Cache/load tokens
     tokens = load_or_get_tokens(corpus)
     X, vocab_size, largest_vector_len = convert_tokens_to_ints(tokens)
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+    
     # Use pad_sequences to standardize the lengths
     X_test = tf.keras.preprocessing.sequence.pad_sequences(X_test, maxlen=largest_vector_len)
     test_size = 500

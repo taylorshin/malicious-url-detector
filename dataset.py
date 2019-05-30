@@ -12,6 +12,7 @@ def load_data(filename):
     """
     Load data from file and return all URL data
     """
+    print('Loading data...')
     df = pd.read_csv(filename)
     # Convert 'bad' (string) to 1 (int)
     # Malicious = 1, not malicious = 0
