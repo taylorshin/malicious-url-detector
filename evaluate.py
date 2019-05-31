@@ -29,7 +29,8 @@ def main():
     
     # Use pad_sequences to standardize the lengths
     X_test = tf.keras.preprocessing.sequence.pad_sequences(X_test, maxlen=largest_vector_len)
-    test_size = 1600
+    test_size = int(X_test.shape[0] / 8)
+    print('Test data size: {}'.format(test_size))
     X_test = X_test[:test_size]
     y_test = y_test[:test_size]
 

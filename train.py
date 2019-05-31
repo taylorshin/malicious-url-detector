@@ -9,7 +9,7 @@ from sklearn.model_selection import train_test_split
 from sklearn.linear_model import LogisticRegression
 from dataset import load_data, get_tokens, load_or_get_tokens, convert_tokens_to_ints
 from model import build_model
-from constants import PLOT_FILE
+from constants import PLOT_FILE, ACC_PLOT_FILE
 
 def train(batch_size, epochs):
     data = load_data('data.csv')
@@ -24,9 +24,9 @@ def train(batch_size, epochs):
     X, vocab_size, largest_vector_len = convert_tokens_to_ints(tokens)
     print('num data points: ', X.shape)
 
-    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2) # , random_state=42)
     # Split train into validation and train
-    X_train, X_val, y_train, y_val = train_test_split(X_train, y_train, test_size=0.2, random_state=42)
+    X_train, X_val, y_train, y_val = train_test_split(X_train, y_train, test_size=0.2) # , random_state=42)
 
     # Use pad_sequences to standardize the lengths
     X_train = tf.keras.preprocessing.sequence.pad_sequences(X_train, maxlen=largest_vector_len)
@@ -34,8 +34,10 @@ def train(batch_size, epochs):
     X_test = tf.keras.preprocessing.sequence.pad_sequences(X_test, maxlen=largest_vector_len)
 
     # For speed
-    train_size = 3200
-    val_size = 3200
+    train_size = int(X_train.shape[0] / 32)
+    val_size = int(X_val.shape[0] / 32)
+    print('Training data size: {}'.format(train_size))
+    print('Validation data size: {}'.format(val_size))
     X_train = X_train[:train_size]
     y_train = y_train[:train_size]
     X_val = X_val[:val_size]
@@ -91,6 +93,15 @@ def main():
     plt.ylabel('Loss')
     plt.legend()
     plt.savefig(PLOT_FILE)
+
+    plt.figure()
+    plt.plot(history.history['acc'], color='blue')
+    plt.plot(history.history['val_acc'], color='red')
+    plt.title('Model accuracy')
+    plt.ylabel('Accuracy')
+    plt.xlabel('Epoch')
+    plt.legend(['Train', 'Validation'], loc='upper left')
+    plt.savefig(ACC_PLOT_FILE)
 
 if __name__ == '__main__':
     main()

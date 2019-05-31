@@ -16,7 +16,7 @@ def build_model(vocab_size, largest_vector_len):
     model = tf.keras.Sequential()
 
     model.add(layers.Embedding(vocab_size, embedding_output_dim, input_length=largest_vector_len))
-    model.add(layers.LSTM(lstm_units, dropout=0.7, recurrent_dropout=0.5))
+    model.add(layers.LSTM(lstm_units, dropout=0.9, recurrent_dropout=0.9)) # adding layers.Bidirectional(layers.LSTM...)) may be helpful?
     model.add(layers.Dense(1, activation='sigmoid'))
     model.compile(loss='binary_crossentropy', optimizer='adam', metrics=['accuracy'])
 
