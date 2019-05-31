@@ -34,6 +34,7 @@ def load_or_get_tokens(corpus):
         print('Caching tokens...')
         tokens = [get_tokens(doc) for doc in corpus]
         # print('TOKENS: ', tokens)
+        os.makedirs(os.path.dirname('out/'), exist_ok=True)
         with open(TOKEN_FNAME, 'wb') as f:
             pickle.dump(tokens, f)
 

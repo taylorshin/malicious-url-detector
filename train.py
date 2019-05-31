@@ -3,9 +3,10 @@ import argparse
 import matplotlib.pyplot as plt
 import numpy as np
 import tensorflow as tf
-from tensorflow.keras import layers
+from tensorflow.python.keras import layers
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.model_selection import train_test_split
+from sklearn.linear_model import LogisticRegression
 from dataset import load_data, get_tokens, load_or_get_tokens, convert_tokens_to_ints
 from model import build_model
 from constants import PLOT_FILE
@@ -34,14 +35,11 @@ def train(batch_size, epochs):
 
     # For speed
     train_size = 3200
-    val_size = 800
-    test_size = 1000
+    val_size = 3200
     X_train = X_train[:train_size]
     y_train = y_train[:train_size]
     X_val = X_val[:val_size]
     y_val = y_val[:val_size]
-    X_test = X_test[:test_size]
-    y_test = y_test[:test_size]
 
     print('Training...')
     model = build_model(vocab_size, largest_vector_len)
@@ -63,7 +61,7 @@ def logistic_regression():
     vectorizer = TfidfVectorizer(tokenizer=get_tokens)
     X = vectorizer.fit_transform(corpus)
 
-    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2) # , random_state=42)
     lgs = LogisticRegression(solver='liblinear', verbose=1)
     lgs.fit(X_train, y_train)
     print('Test Accuracy: ', lgs.score(X_test, y_test))
@@ -86,9 +84,11 @@ def main():
     train_loss = history.history['loss']
     val_loss = history.history['val_loss']
     epochs = range(len(train_loss))
-    plt.plot(epochs, train_loss, label='Training Loss')
-    plt.plot(epochs, val_loss, label='Validation Loss')
+    plt.plot(epochs, train_loss, label='Training Loss', color='blue')
+    plt.plot(epochs, val_loss, label='Validation Loss', color='red')
     plt.title('Training Loss')
+    plt.xlabel('Epoch')
+    plt.ylabel('Loss')
     plt.legend()
     plt.savefig(PLOT_FILE)
 

@@ -25,11 +25,11 @@ def main():
     # Cache/load tokens
     tokens = load_or_get_tokens(corpus)
     X, vocab_size, largest_vector_len = convert_tokens_to_ints(tokens)
-    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2) # , random_state=42)
     
     # Use pad_sequences to standardize the lengths
     X_test = tf.keras.preprocessing.sequence.pad_sequences(X_test, maxlen=largest_vector_len)
-    test_size = 500
+    test_size = 1600
     X_test = X_test[:test_size]
     y_test = y_test[:test_size]
 
