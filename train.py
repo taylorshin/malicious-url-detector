@@ -21,7 +21,7 @@ def train(batch_size, epochs):
     # Cache/load tokens
     tokens = load_or_get_tokens(corpus)
 
-    X, vocab_size, largest_vector_len = convert_tokens_to_ints(tokens)
+    X, vocab_size, largest_vector_len, _ = convert_tokens_to_ints(tokens)
     print('num data points: ', X.shape)
 
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2) # , random_state=42)
@@ -34,8 +34,8 @@ def train(batch_size, epochs):
     X_test = tf.keras.preprocessing.sequence.pad_sequences(X_test, maxlen=largest_vector_len)
 
     # For speed
-    train_size = int(X_train.shape[0] / 32)
-    val_size = int(X_val.shape[0] / 32)
+    train_size = int(X_train.shape[0] / 128)
+    val_size = int(X_val.shape[0] / 128)
     print('Training data size: {}'.format(train_size))
     print('Validation data size: {}'.format(val_size))
     X_train = X_train[:train_size]

@@ -78,7 +78,7 @@ def get_tokens(url):
 
 def convert_tokens_to_ints(tokens):
     """
-    Conver tokens to int sequences
+    Convert tokens to int sequences
     """
     vocab = set([token for doc in tokens for token in doc])
     vocab_size = len(vocab)
@@ -89,8 +89,15 @@ def convert_tokens_to_ints(tokens):
         if len(doc) > largest_vector_len:
             largest_vector_len = len(doc)
 
-    int_seq = np.array([[token_dict[token] for token in doc] for doc in tokens])
-    return int_seq, vocab_size, largest_vector_len
+    # int_seq = np.array([[token_dict[token] for token in doc] for doc in tokens])
+    int_seq = []
+    for doc in tokens:
+        doc_seq = []
+        for token in doc:
+            doc_seq.append(token_dict[token])
+        int_seq.append(doc_seq)
+
+    return np.array(int_seq), vocab_size, largest_vector_len, token_dict
 
 def viterbi_segment(text):
     """
