@@ -4,8 +4,7 @@ import tensorflow as tf
 from sklearn.model_selection import train_test_split
 from dataset import load_data, load_or_get_tokens, convert_tokens_to_ints, get_tokens
 from util import build_or_load_model
-
-MODEL_DIR = 'out/model.h5'
+from constants import MODEL_FILE
 
 def evaluate(model, X, y):
     score, acc = model.evaluate(X, y, verbose=2)#, batch_size=16)
@@ -40,7 +39,7 @@ def encode_url_for_prediction(url):
 
 def main():
     parser = argparse.ArgumentParser(description='Make predictions from trained model')
-    parser.add_argument('--model', default=MODEL_DIR, type=str, help='Path to model file')
+    parser.add_argument('--model', default=MODEL_FILE, type=str, help='Path to model file')
     args = parser.parse_args()
 
     # Load the test data
@@ -51,7 +50,7 @@ def main():
     # Cache/load tokens
     tokens = load_or_get_tokens(corpus)
     X, vocab_size, largest_vector_len, _ = convert_tokens_to_ints(tokens)
-    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2) # , random_state=42)
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
     
     # Use pad_sequences to standardize the lengths
     X_test = tf.keras.preprocessing.sequence.pad_sequences(X_test, maxlen=largest_vector_len)
@@ -64,82 +63,26 @@ def main():
     model = build_or_load_model(args.model, vocab_size, largest_vector_len)
     
     print('Evaluating...')
-    # evaluate(model, X_test, y_test)
+    evaluate(model, X_test, y_test)
+    print()
 
-    test_url = 'http://www.defsnotspam.biz/'
-    print('\n\n\n\nExample prediction:', test_url)
-    prediction_seq = np.array(encode_url_for_prediction(test_url))
-    prediction_seq = prediction_seq[np.newaxis, ...]
-    # print('Prediction Sequence Going In:', prediction_seq)
-    # print('Sequence size:', prediction_seq.shape)
-    prediction = model.predict(prediction_seq, batch_size=1, verbose=1)
+    test_urls = [
+        'defsnotspam.biz/',
+        'google.com',
+        '174vjaijskjrkjviw4.co.ts',
+        'stackoverflow.com/questions/17394882/add-dimensions-to-a-numpy-array',
+        'cambuihostel.com/tmp/chase/7b2592844f7cc97a0f4150e7a7de3a36/',
+    ]
 
-    print('Prediction value:', prediction[0][0])
-    if prediction[0][0] < .5:
-        print('Eh, it\'s probably fine!')
-    else:
-        print('Be wary, traveler.')
-
-
-
-    test_url = 'http://www.google.com/'
-    print('\n\n\n\nExample prediction:', test_url)
-    prediction_seq = np.array(encode_url_for_prediction(test_url))
-    prediction_seq = prediction_seq[np.newaxis, ...]
-    # print('Prediction Sequence Going In:', prediction_seq)
-    # print('Sequence size:', prediction_seq.shape)
-    prediction = model.predict(prediction_seq, batch_size=1, verbose=1)
-
-    print('Prediction value:', prediction[0][0])
-    if prediction[0][0] < .5:
-        print('Eh, it\'s probably fine!')
-    else:
-        print('Be wary, traveler.')
-
-
-    test_url = 'http://www.174vjaijskjrkjviw4.co.ts/'
-    print('\n\n\n\nExample prediction:', test_url)
-    prediction_seq = np.array(encode_url_for_prediction(test_url))
-    prediction_seq = prediction_seq[np.newaxis, ...]
-    # print('Prediction Sequence Going In:', prediction_seq)
-    # print('Sequence size:', prediction_seq.shape)
-    prediction = model.predict(prediction_seq, batch_size=1, verbose=1)
-
-    print('Prediction value:', prediction[0][0])
-    if prediction[0][0] < .5:
-        print('Eh, it\'s probably fine!')
-    else:
-        print('Be wary, traveler.')
-
-
-    test_url = 'https://stackoverflow.com/questions/17394882/add-dimensions-to-a-numpy-array'
-    print('\n\n\n\nExample prediction:', test_url)
-    prediction_seq = np.array(encode_url_for_prediction(test_url))
-    prediction_seq = prediction_seq[np.newaxis, ...]
-    # print('Prediction Sequence Going In:', prediction_seq)
-    # print('Sequence size:', prediction_seq.shape)
-    prediction = model.predict(prediction_seq, batch_size=1, verbose=1)
-
-    print('Prediction value:', prediction[0][0])
-    if prediction[0][0] < .5:
-        print('Eh, it\'s probably fine!')
-    else:
-        print('Be wary, traveler.')
-
-    
-    test_url = 'cambuihostel.com/tmp/chase/7b2592844f7cc97a0f4150e7a7de3a36/'
-    print('\n\n\n\nExample prediction:', test_url)
-    prediction_seq = np.array(encode_url_for_prediction(test_url))
-    prediction_seq = prediction_seq[np.newaxis, ...]
-    # print('Prediction Sequence Going In:', prediction_seq)
-    # print('Sequence size:', prediction_seq.shape)
-    prediction = model.predict(prediction_seq, batch_size=1, verbose=1)
-
-    print('Prediction value:', prediction[0][0])
-    if prediction[0][0] < .5:
-        print('Eh, it\'s probably fine!')
-    else:
-        print('Be wary, traveler.')
+    for url in test_urls:
+        print('Test URL: ', url)
+        pred_seq = np.array(encode_url_for_prediction(url))
+        pred_seq = pred_seq[np.newaxis, ...]
+        # print('Prediction Sequence Going In:', pred_seq)
+        # print('Sequence size:', pred_seq.shape)
+        pred = model.predict(pred_seq, batch_size=1, verbose=1)
+        print('Prediction value: ', pred[0][0])
+        print()
 
 
 if __name__ == '__main__':

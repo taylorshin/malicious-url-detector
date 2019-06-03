@@ -9,9 +9,9 @@ from sklearn.model_selection import train_test_split
 from sklearn.linear_model import LogisticRegression
 from dataset import load_data, get_tokens, load_or_get_tokens, convert_tokens_to_ints
 from model import build_model
-from constants import PLOT_FILE, ACC_PLOT_FILE
+from constants import LOSS_PLOT_FILE, ACC_PLOT_FILE, MODEL_FILE, LOG_DIR, OUT_DIR
 
-def train(batch_size, epochs):
+def train(batch_size, epochs, emb_dim, lstm_units, model_file=MODEL_FILE):
     data = load_data('data.csv')
 
     # Labels
@@ -22,33 +22,34 @@ def train(batch_size, epochs):
     tokens = load_or_get_tokens(corpus)
 
     X, vocab_size, largest_vector_len, _ = convert_tokens_to_ints(tokens)
-    print('num data points: ', X.shape)
 
-    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2) # , random_state=42)
-    # Split train into validation and train
-    X_train, X_val, y_train, y_val = train_test_split(X_train, y_train, test_size=0.2) # , random_state=42)
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+    # Split train into validation and train. Final split for train, val, test is 60%, 20%, 20%
+    X_train, X_val, y_train, y_val = train_test_split(X_train, y_train, test_size=0.25, random_state=42)
 
     # Use pad_sequences to standardize the lengths
     X_train = tf.keras.preprocessing.sequence.pad_sequences(X_train, maxlen=largest_vector_len)
     X_val = tf.keras.preprocessing.sequence.pad_sequences(X_val, maxlen=largest_vector_len)
-    X_test = tf.keras.preprocessing.sequence.pad_sequences(X_test, maxlen=largest_vector_len)
 
     # For speed
-    train_size = int(X_train.shape[0] / 128)
-    val_size = int(X_val.shape[0] / 128)
-    print('Training data size: {}'.format(train_size))
-    print('Validation data size: {}'.format(val_size))
-    X_train = X_train[:train_size]
-    y_train = y_train[:train_size]
-    X_val = X_val[:val_size]
-    y_val = y_val[:val_size]
+    # train_size = int(X_train.shape[0] / 128)
+    # val_size = int(X_val.shape[0] / 128)
+    # print('Training data size: {}'.format(train_size))
+    # print('Validation data size: {}'.format(val_size))
+    # X_train = X_train[:train_size]
+    # y_train = y_train[:train_size]
+    # X_val = X_val[:val_size]
+    # y_val = y_val[:val_size]
 
     print('Training...')
-    model = build_model(vocab_size, largest_vector_len)
+    model = build_model(vocab_size, largest_vector_len, emb_dim, lstm_units)
     model.summary()
     
+    # TODO: figure out whether to monitor ACC or LOSS
     callbacks = [
-        tf.keras.callbacks.ModelCheckpoint('out/model.h5', monitor='acc', save_best_only=True, save_weights_only=True)
+        tf.keras.callbacks.ModelCheckpoint(model_file, monitor='loss', save_best_only=True, save_weights_only=True),
+        tf.keras.callbacks.EarlyStopping(monitor='loss', patience=10, verbose=1),
+        tf.keras.callbacks.TensorBoard(log_dir=LOG_DIR, histogram_freq=0)
     ]
 
     return model.fit(X_train, y_train, validation_data=(X_val, y_val), batch_size=batch_size, epochs=epochs, callbacks=callbacks)
@@ -63,7 +64,7 @@ def logistic_regression():
     vectorizer = TfidfVectorizer(tokenizer=get_tokens)
     X = vectorizer.fit_transform(corpus)
 
-    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2) # , random_state=42)
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
     lgs = LogisticRegression(solver='liblinear', verbose=1)
     lgs.fit(X_train, y_train)
     print('Test Accuracy: ', lgs.score(X_test, y_test))
@@ -79,6 +80,7 @@ def main():
         # Turn on eager execution for debugging
         tf.enable_eager_execution()
 
+    """
     # Train the model
     history = train(args.batch_size, args.epochs)
 
@@ -88,20 +90,58 @@ def main():
     epochs = range(len(train_loss))
     plt.plot(epochs, train_loss, label='Training Loss', color='blue')
     plt.plot(epochs, val_loss, label='Validation Loss', color='red')
-    plt.title('Training Loss')
+    plt.title('Loss')
     plt.xlabel('Epoch')
     plt.ylabel('Loss')
     plt.legend()
-    plt.savefig(PLOT_FILE)
+    plt.savefig(LOSS_PLOT_FILE)
 
     plt.figure()
     plt.plot(history.history['acc'], color='blue')
     plt.plot(history.history['val_acc'], color='red')
-    plt.title('Model accuracy')
-    plt.ylabel('Accuracy')
+    plt.title('Accuracy')
     plt.xlabel('Epoch')
+    plt.ylabel('Accuracy')
     plt.legend(['Train', 'Validation'], loc='upper left')
     plt.savefig(ACC_PLOT_FILE)
+    """
+
+    ### Hyperparameter search ###
+    # lrs = [1e-3, 1e-4, 1e-5]
+    # emb_dim_list = [16, 32, 64, 128, 256]
+    emb_dim_list = [32, 64, 128]
+    # lstm_units_list = [16, 32, 64, 128, 256]
+    lstm_units_list = [32, 64, 128]
+    # dropout_rate_list = [0.25, 0.5, 0.75]
+
+    train_losses = []
+    val_losses = []
+
+    for emb_dim in emb_dim_list:
+        for lstm_units in lstm_units_list:
+            print('EMB DIM: {}, LSTM UNITS: {}'.format(emb_dim, lstm_units))
+            param_str = str(emb_dim) + '_' + str(lstm_units)
+            # Train the model
+            model_file = os.path.join(OUT_DIR, 'model_' + param_str + '.h5')
+            history = train(args.batch_size, args.epochs, emb_dim, lstm_units, model_file)
+            train_losses.append(history.history['loss'][-1])
+            val_losses.append(history.history['val_loss'][-1])
+            print('Train losses: ', train_losses)
+            print('Val losses: ', val_losses)
+            train_loss = history.history['loss']
+            val_loss = history.history['val_loss']
+            epochs = range(len(train_loss))
+            # Plot and save
+            plt.plot(epochs, train_loss, label='Training Loss', color='blue')
+            plt.plot(epochs, val_loss, label='Validation Loss', color='red')
+            plt.title('Loss')
+            plt.xlabel('Epoch')
+            plt.ylabel('Loss')
+            plt.legend()
+            plot_file = os.path.join(OUT_DIR, 'loss_' + param_str + '.png')
+            plt.savefig(plot_file)
+            print('-----------------------------------------------------------------------')
+
 
 if __name__ == '__main__':
     main()
