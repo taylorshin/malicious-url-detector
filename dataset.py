@@ -5,8 +5,7 @@ import numpy as np
 import pandas as pd
 from collections import Counter
 from sklearn.model_selection import train_test_split
-
-TOKEN_FNAME = 'out/tokens.pickle'
+from constants import TOKEN_FNAME
 
 def load_data(filename):
     """
@@ -14,11 +13,15 @@ def load_data(filename):
     """
     print('Loading data...')
     df = pd.read_csv(filename)
-    # Convert 'bad' (string) to 1 (int)
-    # Malicious = 1, not malicious = 0
+
+    # Convert 'bad' (string) to 1 (int). Malicious = 1, benign = 0
     df['label'] = df['label'].apply(lambda x: int(x == 'bad'))
-    data = df.to_numpy()
-    return data
+
+    # Balance dataset to 50% benign and 50% malicious
+    good_count, bad_count = df.label.value_counts().tolist()
+    df = df.drop(df[df['label'] == 0].sample(n=good_count-bad_count).index)
+
+    return df.to_numpy()
 
 def load_or_get_tokens(corpus):
     """
@@ -129,3 +132,10 @@ def words(text):
 dictionary = Counter(words(open('words.txt').read()))
 MAX_WORD_LENGTH = max(map(len, dictionary))
 TOTAL_NUM_WORDS = float(sum(dictionary.values()))
+
+def main():
+    data = load_data('data.csv')
+
+
+if __name__ == '__main__':
+    main()

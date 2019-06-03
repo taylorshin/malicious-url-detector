@@ -1,23 +1,32 @@
 import numpy as np
 import tensorflow as tf
+from tensorflow import keras
 from tensorflow.python.keras import layers
 
-def build_model(vocab_size, largest_vector_len):
-    # Resources:
-    # https://towardsdatascience.com/understanding-lstm-and-its-quick-implementation-in-keras-for-sentiment-analysis-af410fd85b47
-    # https://machinelearningmastery.com/sequence-classification-lstm-recurrent-neural-networks-python-keras/
-
-    # Play with these
-    embedding_output_dim = 16
-    lstm_units = 128
-
+def build_model(vocab_size, largest_vector_len, emb_dim=16, lstm_units=16, lr=1e-3, dropout_rate=0.5):
+    """
+    1D convolution and LSTM coming soon
+    """
     tf.logging.set_verbosity(tf.logging.ERROR)
 
     model = tf.keras.Sequential()
 
-    model.add(layers.Embedding(vocab_size, embedding_output_dim, input_length=largest_vector_len))
-    model.add(layers.LSTM(lstm_units, dropout=0.9, recurrent_dropout=0.9)) # adding layers.Bidirectional(layers.LSTM...)) may be helpful?
-    model.add(layers.Dense(1, activation='sigmoid'))
-    model.compile(loss='binary_crossentropy', optimizer='adam', metrics=['accuracy'])
+    # Embedding layer
+    model.add(layers.Embedding(vocab_size, emb_dim, input_length=largest_vector_len))
+    model.add(layers.Dropout(dropout_rate))
 
+    # Convolutional layer
+    # TODO: Experiment with conv layer
+
+    # LSTM layer
+    # TODO: Adding layers.Bidirectional(layers.LSTM...)) may be helpful?
+    # model.add(layers.LSTM(lstm_units, dropout=0.9, recurrent_dropout=0.9))
+    model.add(layers.LSTM(lstm_units, recurrent_dropout=dropout_rate))
+    model.add(layers.Dropout(dropout_rate))
+
+    # Output layer
+    model.add(layers.Dense(1, activation='sigmoid'))
+
+    optimizer = keras.optimizers.Adam(lr=lr)
+    model.compile(loss='binary_crossentropy', optimizer=optimizer, metrics=['accuracy'])
     return model

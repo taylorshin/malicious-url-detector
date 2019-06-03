@@ -3,6 +3,7 @@ out/
 *.bin
 .DS_Store
 !out/model.h5
+*.pkl
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
