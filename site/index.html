@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en-US">
+<head>
+	<meta charset="UTF-8">
+	<title>Malicious URL Detector</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@1.0.0/dist/tf.min.js"></script>
+    <script>
+        const model = await tf.loadLayersModel('./model.json');
+        
+        function predict(url) {
+            return model.predict(url);
+        }
+
+        function showPrediction(url) {
+            const prediction = predict(url);
+
+            const box = document.getElementById('prediction-box');
+            const resultText = document.getElementById('prediction-result');
+            
+        }
+
+    </script>
+</head>
+<body>
+    <h1>Malicious URL Detector</h1>
+    <form>
+        <label for="url">Enter a URL:</label>
+        <input style="width: 600px;" type="text" id="url">
+    </form>
+
+    <div id="prediction-box">
+        This URL is<br>
+        <span id="prediction-result">safe</span>
+    </div>
+</body>
+</html>

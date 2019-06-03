@@ -1,6 +1,8 @@
 # Custom
 out/
 *.bin
+.DS_Store
+!out/model.h5
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
@@ -102,12 +104,8 @@ venv.bak/
 .ropeproject
 
 # mkdocs documentation
-/site
+# /site
 
 # mypy
 .mypy_cache/
 
-
-# Custom Things
-.DS_Store
-dict.txt

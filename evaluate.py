@@ -48,6 +48,8 @@ def main():
     y = [d[1] for d in data]
     corpus = [d[0] for d in data]
 
+    print('Dist of data:', np.mean(y))
+
     # Cache/load tokens
     tokens = load_or_get_tokens(corpus)
     X, vocab_size, largest_vector_len, _ = convert_tokens_to_ints(tokens)
@@ -60,11 +62,15 @@ def main():
     X_test = X_test[:test_size]
     y_test = y_test[:test_size]
 
+    print('Some test data:')
+    print(X_test[:5])
+    print(y_test[:5])
+
     # Load the model
     model = build_or_load_model(args.model, vocab_size, largest_vector_len)
     
     print('Evaluating...')
-    # evaluate(model, X_test, y_test)
+    evaluate(model, X_test, y_test)
 
     test_url = 'http://www.defsnotspam.biz/'
     print('\n\n\n\nExample prediction:', test_url)
@@ -130,6 +136,73 @@ def main():
     test_url = 'cambuihostel.com/tmp/chase/7b2592844f7cc97a0f4150e7a7de3a36/'
     print('\n\n\n\nExample prediction:', test_url)
     prediction_seq = np.array(encode_url_for_prediction(test_url))
+    prediction_seq = prediction_seq[np.newaxis, ...]
+    # print('Prediction Sequence Going In:', prediction_seq)
+    # print('Sequence size:', prediction_seq.shape)
+    prediction = model.predict(prediction_seq, batch_size=1, verbose=1)
+
+    print('Prediction value:', prediction[0][0])
+    if prediction[0][0] < .5:
+        print('Eh, it\'s probably fine!')
+    else:
+        print('Be wary, traveler.')
+
+
+    print('\n\n\n\nExample prediction: custom')
+    prediction_seq = np.array([1, 553, 746, 21, 743, 1, 553, 746, 21, 743, 1, 553, 746, 21, 743, 1, 553, 746, 21, 743, 1, 553, 746, 21, 743, 1, 553, 746, 21, 743, 1, 553, 746, 21, 743, 1, 553, 746, 21, 743, 1, 553, 746, 21, 743, 1, 553, 746, 21, 743, 1, 553, 746, 21, 743, 1, 553, 746, 21, 743, 1, 553, 746, 21, 743, 1, 553, 746, 21, 743, 1, 553, 746, 21, 743, 1, 553, 746, 21, 743, 1, 553, 746, 21, 743, 1, 553, 746, 21, 743, 1, 553, 746, 21, 743, 1, 553, 746, 21, 743, 1, 553, 746, 21, 743, 1, 553, 746, 21, 743, 1, 553, 746, 21, 743, 1, 553, 746, 21, 743, 426, 2351, 452, 1])
+    prediction_seq = prediction_seq[np.newaxis, ...]
+    # print('Prediction Sequence Going In:', prediction_seq)
+    # print('Sequence size:', prediction_seq.shape)
+    prediction = model.predict(prediction_seq, batch_size=1, verbose=1)
+
+    print('Prediction value:', prediction[0][0])
+    if prediction[0][0] < .5:
+        print('Eh, it\'s probably fine!')
+    else:
+        print('Be wary, traveler.')
+    
+
+    print('\n\n\n\nExample prediction: test data 1')
+    prediction_seq = np.array([0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+,  0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+,  0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+,  0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+,  0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+,  0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+,  0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+,  0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+,  0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+,  0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+,  0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+,  0, 0, 0, 0, 0, 0, 188804, 251606,   1463,  51190,
+  231499, 255416, 211142, 209901])
+    prediction_seq = prediction_seq[np.newaxis, ...]
+    # print('Prediction Sequence Going In:', prediction_seq)
+    # print('Sequence size:', prediction_seq.shape)
+    prediction = model.predict(prediction_seq, batch_size=1, verbose=1)
+
+    print('Prediction value:', prediction[0][0])
+    if prediction[0][0] < .5:
+        print('Eh, it\'s probably fine!')
+    else:
+        print('Be wary, traveler.')
+
+
+
+    print('\n\n\n\nExample prediction: test data 1')
+    prediction_seq = np.array([0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+,  0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+,  0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+,  0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+,  0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+,  0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+,  0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+,  0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+,  0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+,  0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+,  0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+,  0, 0,  40597, 209901,  52869, 186725, 271923, 274684,  13017,  51190,
+  179116,   8835, 108020, 169832])
     prediction_seq = prediction_seq[np.newaxis, ...]
     # print('Prediction Sequence Going In:', prediction_seq)
     # print('Sequence size:', prediction_seq.shape)
