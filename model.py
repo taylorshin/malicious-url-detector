@@ -3,7 +3,7 @@ import tensorflow as tf
 from tensorflow import keras
 from tensorflow.python.keras import layers
 
-def build_model(vocab_size, largest_vector_len, emb_dim=128, lstm_units=128, lr=1e-3, dropout_rate=0.5):
+def build_model(vocab_size, largest_vector_len, emb_dim=64, lstm_units=128, lr=1e-3, dropout_rate=0.5):
     """
     1D convolution and LSTM coming soon
     """
@@ -16,7 +16,8 @@ def build_model(vocab_size, largest_vector_len, emb_dim=128, lstm_units=128, lr=
     model.add(layers.Dropout(dropout_rate))
 
     # Convolutional layer
-    # TODO: Experiment with conv layer
+    model.add(layers.Conv1D(filters=32, kernel_size=3, padding='same', activation='relu'))
+    model.add(layers.MaxPooling1D(pool_size=2))
 
     # LSTM layer
     # TODO: Adding layers.Bidirectional(layers.LSTM...)) may be helpful?

@@ -11,7 +11,7 @@ from dataset import load_data, get_tokens, load_or_get_tokens, convert_tokens_to
 from model import build_model
 from constants import LOSS_PLOT_FILE, ACC_PLOT_FILE, MODEL_FILE, LOG_DIR, OUT_DIR
 
-def train(batch_size, epochs, emb_dim=128, lstm_units=128, model_file=MODEL_FILE):
+def train(batch_size, epochs, lr, dropout_rate, model_file=MODEL_FILE):
     data = load_data('data.csv')
 
     # Labels
@@ -35,19 +35,19 @@ def train(batch_size, epochs, emb_dim=128, lstm_units=128, model_file=MODEL_FILE
     # Split train into validation and train. Final split for train, val, test is 60%, 20%, 20%
     X_train, X_val, y_train, y_val = train_test_split(X_train, y_train, test_size=0.25, random_state=42)
 
-    # For speed
-    train_size = int(X_train.shape[0] / 32)
-    val_size = int(X_val.shape[0] / 32)
-    print('Training data size: {}'.format(train_size))
-    print('Validation data size: {}'.format(val_size))
-    X_train = X_train[:train_size]
-    y_train = y_train[:train_size]
-    X_val = X_val[:val_size]
-    y_val = y_val[:val_size]
+    # Use partial dataset for speed
+    # train_size = int(X_train.shape[0] / 32)
+    # val_size = int(X_val.shape[0] / 32)
+    # print('Training data size: {}'.format(train_size))
+    # print('Validation data size: {}'.format(val_size))
+    # X_train = X_train[:train_size]
+    # y_train = y_train[:train_size]
+    # X_val = X_val[:val_size]
+    # y_val = y_val[:val_size]
 
     print('Training...')
     print('Training data shape:', X_train.shape)
-    model = build_model(vocab_size, largest_vector_len, emb_dim, lstm_units)
+    model = build_model(vocab_size, largest_vector_len, lr=lr, dropout_rate=dropout_rate)
     model.summary()
     
     # TODO: figure out whether to monitor ACC or LOSS
@@ -111,23 +111,23 @@ def main():
 
     """
     ### Hyperparameter search ###
-    # lrs = [1e-3, 1e-4, 1e-5]
+    lrs = [1e-3, 1e-4, 1e-5]
     # emb_dim_list = [16, 32, 64, 128, 256]
-    emb_dim_list = [32, 64, 128]
+    # emb_dim_list = [32, 64, 128]
     # lstm_units_list = [16, 32, 64, 128, 256]
-    lstm_units_list = [32, 64, 128]
-    # dropout_rate_list = [0.25, 0.5, 0.75]
+    # lstm_units_list = [32, 64, 128]
+    dropout_rate_list = [0.25, 0.5, 0.75]
 
     train_losses = []
     val_losses = []
 
-    for emb_dim in emb_dim_list:
-        for lstm_units in lstm_units_list:
-            print('EMB DIM: {}, LSTM UNITS: {}'.format(emb_dim, lstm_units))
-            param_str = str(emb_dim) + '_' + str(lstm_units)
+    for lr in lrs:
+        for dropout_rate in dropout_rate_list:
+            print('LR: {}, DR: {}'.format(lr, dropout_rate))
+            param_str = 'lr' + str(lr) + '_dr' + str(dropout_rate)
             # Train the model
             model_file = os.path.join(OUT_DIR, 'model_' + param_str + '.h5')
-            history = train(args.batch_size, args.epochs, emb_dim, lstm_units, model_file)
+            history = train(args.batch_size, args.epochs, lr, dropout_rate, model_file)
             train_losses.append(history.history['loss'][-1])
             val_losses.append(history.history['val_loss'][-1])
             print('Train losses: ', train_losses)
@@ -136,6 +136,7 @@ def main():
             val_loss = history.history['val_loss']
             epochs = range(len(train_loss))
             # Plot and save
+            plt.figure()
             plt.plot(epochs, train_loss, label='Training Loss', color='blue')
             plt.plot(epochs, val_loss, label='Validation Loss', color='red')
             plt.title('Loss')
