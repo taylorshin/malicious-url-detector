@@ -9,6 +9,7 @@ def build_or_load_model(model_dir, vocab_size, largest_vector_len, allow_load=Tr
         try:
             model.load_weights(model_dir)
             print('Loaded model from file.')
-        except:
+        except Exception as e:
             print('Unable to load model from file.')
+            print(str(e))
     return model

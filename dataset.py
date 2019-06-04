@@ -6,6 +6,10 @@ import pandas as pd
 from collections import Counter
 from sklearn.model_selection import train_test_split
 from constants import TOKEN_FNAME
+import re
+
+# Global dictionary of top level domains
+TLDs = {}
 
 def load_data(filename):
     """
@@ -47,37 +51,25 @@ def get_tokens(url):
     """
     Tokenize the given URL
     """
-    tokens = []
-    # Split tokens initially by slash
-    tokens_slash = url.split('/')
-    tokens_slash = list(filter(None, tokens_slash))
-    for ts in tokens_slash:
-        tokens_dash = ts.split('-')
-        for td in tokens_dash:
-            tokens_dot = td.split('.')
-            for tdot in tokens_dot:
-                # Split joined words
-                tokens_word = viterbi_segment(tdot)[0]
-                # If word is split into more than 5 single characters, don't tokenize via viterbi method
-                singles = [t for t in tokens_word if len(t) == 1]
-                if len(singles) > 5:
-                    tokens = tokens + tokens_dot
-                    break
-                else:
-                    tokens = tokens + tokens_word
-
-    # TODO: split by other symbols like =, ?, etc?
-
-    # Remove redundant tokens
-    # P: Do we want to? Should we not preserve the sequence?
-    # tokens = list(set(tokens))
-
-    # Remove .com
-    # P: This may be useful in differentiating from less trust-worthy top-level domains. I'm getting slightly higher accuracy without.
-    # if 'com' in tokens:
-    #     tokens.remove('com')
-
+    tokens = re.split(r'[\/\-\.\&\?\=\_]+', url)
+    for i, token in enumerate(tokens):
+        word_split = viterbi_segment(token)[0]
+        if len(word_split) < 4:
+            tokens[i:i+1] = word_split[0:len(word_split)]
     return tokens
+
+# def extract_features(url):
+#     url_length = len(url)
+#     n_digits = sum(c.isdigit() for c in url)
+
+#     slash_loc = url.find('/')
+#     dot_loc = url[:slash_loc].rfind('.')
+#     top_domain = url[dot_loc+1:slash_loc]
+#     if top_domain not in TLDs:
+#         TLDs[top_domain] = len(TLDs)
+#     top_domain = TLDs[top_domain]
+
+#     return url_length, n_digits, top_domain
 
 def convert_tokens_to_ints(tokens):
     """
@@ -92,7 +84,6 @@ def convert_tokens_to_ints(tokens):
         if len(doc) > largest_vector_len:
             largest_vector_len = len(doc)
 
-    # int_seq = np.array([[token_dict[token] for token in doc] for doc in tokens])
     int_seq = []
     for doc in tokens:
         doc_seq = []
@@ -135,7 +126,6 @@ TOTAL_NUM_WORDS = float(sum(dictionary.values()))
 
 def main():
     data = load_data('data.csv')
-
 
 if __name__ == '__main__':
     main()

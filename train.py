@@ -7,11 +7,11 @@ from tensorflow.python.keras import layers
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.model_selection import train_test_split
 from sklearn.linear_model import LogisticRegression
-from dataset import load_data, get_tokens, load_or_get_tokens, convert_tokens_to_ints
+from dataset import load_data, get_tokens, load_or_get_tokens, convert_tokens_to_ints # , extract_features
 from model import build_model
 from constants import LOSS_PLOT_FILE, ACC_PLOT_FILE, MODEL_FILE, LOG_DIR, OUT_DIR
 
-def train(batch_size, epochs, emb_dim, lstm_units, model_file=MODEL_FILE):
+def train(batch_size, epochs, emb_dim=128, lstm_units=128, model_file=MODEL_FILE):
     data = load_data('data.csv')
 
     # Labels
@@ -22,26 +22,31 @@ def train(batch_size, epochs, emb_dim, lstm_units, model_file=MODEL_FILE):
     tokens = load_or_get_tokens(corpus)
 
     X, vocab_size, largest_vector_len, _ = convert_tokens_to_ints(tokens)
+    # X_features = [extract_features(url) for url in corpus]
+
+    # Use pad_sequences to standardize the lengths
+    print('Padding sequences and extracting features...')
+    X = tf.keras.preprocessing.sequence.pad_sequences(X, maxlen=largest_vector_len)
+
+    # some kind of zip between X (list of lists of ints) and X_features (list of tuples)
+    # X = np.array([[(token, X_features[i][0], X_features[i][1], X_features[i][2]) for token in X[i]] for i in range(len(X))])
 
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
     # Split train into validation and train. Final split for train, val, test is 60%, 20%, 20%
     X_train, X_val, y_train, y_val = train_test_split(X_train, y_train, test_size=0.25, random_state=42)
 
-    # Use pad_sequences to standardize the lengths
-    X_train = tf.keras.preprocessing.sequence.pad_sequences(X_train, maxlen=largest_vector_len)
-    X_val = tf.keras.preprocessing.sequence.pad_sequences(X_val, maxlen=largest_vector_len)
-
     # For speed
-    # train_size = int(X_train.shape[0] / 128)
-    # val_size = int(X_val.shape[0] / 128)
-    # print('Training data size: {}'.format(train_size))
-    # print('Validation data size: {}'.format(val_size))
-    # X_train = X_train[:train_size]
-    # y_train = y_train[:train_size]
-    # X_val = X_val[:val_size]
-    # y_val = y_val[:val_size]
+    train_size = int(X_train.shape[0] / 32)
+    val_size = int(X_val.shape[0] / 32)
+    print('Training data size: {}'.format(train_size))
+    print('Validation data size: {}'.format(val_size))
+    X_train = X_train[:train_size]
+    y_train = y_train[:train_size]
+    X_val = X_val[:val_size]
+    y_val = y_val[:val_size]
 
     print('Training...')
+    print('Training data shape:', X_train.shape)
     model = build_model(vocab_size, largest_vector_len, emb_dim, lstm_units)
     model.summary()
     
@@ -80,7 +85,6 @@ def main():
         # Turn on eager execution for debugging
         tf.enable_eager_execution()
 
-    """
     # Train the model
     history = train(args.batch_size, args.epochs)
 
@@ -104,8 +108,8 @@ def main():
     plt.ylabel('Accuracy')
     plt.legend(['Train', 'Validation'], loc='upper left')
     plt.savefig(ACC_PLOT_FILE)
-    """
 
+    """
     ### Hyperparameter search ###
     # lrs = [1e-3, 1e-4, 1e-5]
     # emb_dim_list = [16, 32, 64, 128, 256]
@@ -141,6 +145,7 @@ def main():
             plot_file = os.path.join(OUT_DIR, 'loss_' + param_str + '.png')
             plt.savefig(plot_file)
             print('-----------------------------------------------------------------------')
+    """
 
 
 if __name__ == '__main__':

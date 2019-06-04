@@ -3,7 +3,7 @@ import tensorflow as tf
 from tensorflow import keras
 from tensorflow.python.keras import layers
 
-def build_model(vocab_size, largest_vector_len, emb_dim=16, lstm_units=16, lr=1e-3, dropout_rate=0.5):
+def build_model(vocab_size, largest_vector_len, emb_dim=128, lstm_units=128, lr=1e-3, dropout_rate=0.5):
     """
     1D convolution and LSTM coming soon
     """
@@ -20,8 +20,7 @@ def build_model(vocab_size, largest_vector_len, emb_dim=16, lstm_units=16, lr=1e
 
     # LSTM layer
     # TODO: Adding layers.Bidirectional(layers.LSTM...)) may be helpful?
-    # model.add(layers.LSTM(lstm_units, dropout=0.9, recurrent_dropout=0.9))
-    model.add(layers.LSTM(lstm_units, recurrent_dropout=dropout_rate))
+    model.add(layers.LSTM(lstm_units, recurrent_dropout=dropout_rate))# input_shape=(largest_vector_len, 4)))
     model.add(layers.Dropout(dropout_rate))
 
     # Output layer

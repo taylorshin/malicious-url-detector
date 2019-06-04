@@ -6,10 +6,12 @@
     <link rel="stylesheet" href="style.css">
     <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@1.0.0/dist/tf.min.js"></script>
     <script>
-        const model = await tf.loadLayersModel('./model.json');
+        const model = tf.loadLayersModel('./model.json');
         
         function predict(url) {
-            return model.predict(url);
+            // TODO: Add prediction logic to transform URL for model input
+            // return model.predict(url);
+            return 0.4;
         }
 
         function showPrediction(url) {
@@ -17,7 +19,17 @@
 
             const box = document.getElementById('prediction-box');
             const resultText = document.getElementById('prediction-result');
-            
+            if (prediction < 0.5) {
+                resultText.innerText = 'safe';
+                resultText.style.color = '#00bb00';
+                box.style.borderColor = '#00bb00';
+            }
+            else {
+                resultText.innerText = 'dangerous!'
+                resultText.style.color = 'red';
+                box.style.borderColor = 'red';
+            }
+            box.style.visibility = "visible";
         }
 
     </script>
