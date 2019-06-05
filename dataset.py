@@ -1,5 +1,6 @@
 import re
 import os
+import json
 import pickle
 import numpy as np
 import pandas as pd
@@ -125,7 +126,16 @@ MAX_WORD_LENGTH = max(map(len, dictionary))
 TOTAL_NUM_WORDS = float(sum(dictionary.values()))
 
 def main():
-    data = load_data('data.csv')
+    # data = load_data('data.csv')
+
+    # Save dictionary for website use
+    # with open('dict_count.json', 'w') as f:
+    #     f.write(json.dumps(dictionary))
+    
+    # word_split = viterbi_segment('helloworld')[0]
+    # print('Word split:', word_split)
+
+    print(get_tokens('realinnovation.com/css/menu.js'))
 
 if __name__ == '__main__':
     main()

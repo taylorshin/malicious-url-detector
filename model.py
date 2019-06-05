@@ -3,7 +3,7 @@ import tensorflow as tf
 from tensorflow import keras
 from tensorflow.python.keras import layers
 
-def build_model(vocab_size, largest_vector_len, emb_dim=64, lstm_units=128, lr=1e-3, dropout_rate=0.5):
+def build_model(vocab_size, largest_vector_len, emb_dim=64, lstm_units=128, lr=1e-4, dropout_rate=0.5):
     """
     1D convolution and LSTM coming soon
     """

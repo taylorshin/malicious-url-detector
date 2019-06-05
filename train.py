@@ -11,7 +11,8 @@ from dataset import load_data, get_tokens, load_or_get_tokens, convert_tokens_to
 from model import build_model
 from constants import LOSS_PLOT_FILE, ACC_PLOT_FILE, MODEL_FILE, LOG_DIR, OUT_DIR
 
-def train(batch_size, epochs, lr, dropout_rate, model_file=MODEL_FILE):
+# def train(batch_size, epochs, lr, dropout_rate, model_file=MODEL_FILE):
+def train(batch_size, epochs, model_file=MODEL_FILE):
     data = load_data('data.csv')
 
     # Labels
@@ -47,12 +48,13 @@ def train(batch_size, epochs, lr, dropout_rate, model_file=MODEL_FILE):
 
     print('Training...')
     print('Training data shape:', X_train.shape)
-    model = build_model(vocab_size, largest_vector_len, lr=lr, dropout_rate=dropout_rate)
+    # model = build_model(vocab_size, largest_vector_len, lr=lr, dropout_rate=dropout_rate)
+    model = build_model(vocab_size, largest_vector_len)
     model.summary()
     
     # TODO: figure out whether to monitor ACC or LOSS
     callbacks = [
-        tf.keras.callbacks.ModelCheckpoint(model_file, monitor='loss', save_best_only=True, save_weights_only=True),
+        tf.keras.callbacks.ModelCheckpoint(model_file, monitor='loss', save_best_only=True), #, save_weights_only=True),
         tf.keras.callbacks.EarlyStopping(monitor='loss', patience=10, verbose=1),
         tf.keras.callbacks.TensorBoard(log_dir=LOG_DIR, histogram_freq=0)
     ]
@@ -77,8 +79,8 @@ def logistic_regression():
 def main():
     parser = argparse.ArgumentParser(description='Trains the model')
     parser.add_argument('--debug', default=False, type=bool, help='Debug mode')
-    parser.add_argument('--batch-size', default=16, type=int, help='Size of training batch')
-    parser.add_argument('--epochs', default=100, type=int, help='Number of epochs to train for')
+    parser.add_argument('--batch-size', default=32, type=int, help='Size of training batch')
+    parser.add_argument('--epochs', default=10, type=int, help='Number of epochs to train for')
     args = parser.parse_args()
 
     if args.debug:
