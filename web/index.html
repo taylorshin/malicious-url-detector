@@ -8,11 +8,12 @@
     <script src="https://code.jquery.com/jquery-3.4.1.min.js" integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo=" crossorigin="anonymous"></script>
     <script src="index.js"></script>
 </head>
-<body>
+<body onLoad="onload();">
     <h1>Malicious URL Detector</h1>
-    <form>
+    <form id="form">
         <label for="url">Enter a URL:</label>
         <input style="width: 600px;" type="text" id="url">
+        <input type="submit" onclick="showPrediction();">
     </form>
 
     <div id="prediction-box">

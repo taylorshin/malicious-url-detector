@@ -3,6 +3,9 @@ const TOTAL_NUM_WORDS = 515572.0;
 const VOCAB_SIZE = 116085;
 const LARGEST_VEC_LEN = 89;
 
+wordDict = 0;
+tokenDict = 0;
+
 async function loadModel() {
     console.log('Loading model...');
     const model = await tf.loadLayersModel('model.json');
@@ -81,8 +84,12 @@ function predict(model, wordDict, tokenDict, url) {
     return model.predict(x);
 }
 
-function showPrediction(url) {
-    const prediction = predict(url);
+function showPrediction() {
+    url = document.getElementById('url').value;
+    model = loadModel();
+
+    const prediction = predict(model, wordDict, tokenDict, url);
+    console.log('Prediction received!');
 
     const box = document.getElementById('prediction-box');
     const resultText = document.getElementById('prediction-result');
@@ -97,6 +104,14 @@ function showPrediction(url) {
         box.style.borderColor = 'red';
     }
     box.style.visibility = "visible";
+}
+
+function onload() {
+    var form = document.getElementById('form');
+    function handleForm(event) {
+        event.preventDefault();
+    }
+    form.addEventListener('submit', handleForm);
 }
 
 loadModel().then((model) => {
