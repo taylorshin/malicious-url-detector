@@ -2,7 +2,7 @@ import argparse
 import numpy as np
 import tensorflow as tf
 from sklearn.model_selection import train_test_split
-from dataset import load_data, load_or_get_tokens, convert_tokens_to_ints, get_tokens # , extract_features
+from dataset import load_data, load_or_get_tokens, convert_tokens_to_ints, get_tokens, extract_features
 from util import build_or_load_model
 from constants import MODEL_FILE
 
@@ -51,7 +51,7 @@ def main():
     y_test = y_test[:test_size]
 
     # Load the model
-    model = build_or_load_model(args.model, vocab_size, largest_vector_len)
+    model = build_or_load_model(args.model, vocab_size, largest_vector_len, emb_dim=8, lstm_units=8)
     
     print('Evaluating...')
     evaluate(model, X_test, y_test)

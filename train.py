@@ -7,7 +7,7 @@ from tensorflow.python.keras import layers
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.model_selection import train_test_split
 from sklearn.linear_model import LogisticRegression
-from dataset import load_data, get_tokens, load_or_get_tokens, convert_tokens_to_ints # , extract_features
+from dataset import load_data, get_tokens, load_or_get_tokens, convert_tokens_to_ints, extract_features
 from model import build_model
 from constants import LOSS_PLOT_FILE, ACC_PLOT_FILE, MODEL_FILE, LOG_DIR, OUT_DIR
 
@@ -36,8 +36,8 @@ def train(batch_size, epochs, emb_dim=128, lstm_units=128, model_file=MODEL_FILE
     X_train, X_val, y_train, y_val = train_test_split(X_train, y_train, test_size=0.25, random_state=42)
 
     # For speed
-    train_size = int(X_train.shape[0] / 32)
-    val_size = int(X_val.shape[0] / 32)
+    train_size = int(X_train.shape[0] / 4)
+    val_size = int(X_val.shape[0] / 4)
     print('Training data size: {}'.format(train_size))
     print('Validation data size: {}'.format(val_size))
     X_train = X_train[:train_size]
@@ -47,7 +47,7 @@ def train(batch_size, epochs, emb_dim=128, lstm_units=128, model_file=MODEL_FILE
 
     print('Training...')
     print('Training data shape:', X_train.shape)
-    model = build_model(vocab_size, largest_vector_len, emb_dim, lstm_units)
+    model = build_model(vocab_size, largest_vector_len, emb_dim, lstm_units, dropout_rate=0.7)
     model.summary()
     
     # TODO: figure out whether to monitor ACC or LOSS
@@ -86,7 +86,7 @@ def main():
         tf.enable_eager_execution()
 
     # Train the model
-    history = train(args.batch_size, args.epochs)
+    history = train(args.batch_size, args.epochs, emb_dim=8, lstm_units=8)
 
     ### Plot training and validation loss over epochs ###
     train_loss = history.history['loss']
@@ -146,7 +146,6 @@ def main():
             plt.savefig(plot_file)
             print('-----------------------------------------------------------------------')
     """
-
 
 if __name__ == '__main__':
     main()

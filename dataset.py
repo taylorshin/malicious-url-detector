@@ -58,18 +58,38 @@ def get_tokens(url):
             tokens[i:i+1] = word_split[0:len(word_split)]
     return tokens
 
-# def extract_features(url):
-#     url_length = len(url)
-#     n_digits = sum(c.isdigit() for c in url)
+    # tokens = []
+    # # Split tokens initially by slash
+    # tokens_slash = url.split('/')
+    # tokens_slash = list(filter(None, tokens_slash))
+    # for ts in tokens_slash:
+    #     tokens_dash = ts.split('-')
+    #     for td in tokens_dash:
+    #         tokens_dot = td.split('.')
+    #         for tdot in tokens_dot:
+    #             # Split joined words
+    #             tokens_word = viterbi_segment(tdot)[0]
+    #             # If word is split into more than 5 single characters, don't tokenize via viterbi method
+    #             singles = [t for t in tokens_word if len(t) == 1]
+    #             if len(singles) > 5:
+    #                 tokens = tokens + tokens_dot
+    #                 break
+    #             else:
+    #                 tokens = tokens + tokens_word
+    # return tokens
 
-#     slash_loc = url.find('/')
-#     dot_loc = url[:slash_loc].rfind('.')
-#     top_domain = url[dot_loc+1:slash_loc]
-#     if top_domain not in TLDs:
-#         TLDs[top_domain] = len(TLDs)
-#     top_domain = TLDs[top_domain]
+def extract_features(url):
+    url_length = len(url)
+    n_digits = sum(c.isdigit() for c in url)
 
-#     return url_length, n_digits, top_domain
+    slash_loc = url.find('/')
+    dot_loc = url[:slash_loc].rfind('.')
+    top_domain = url[dot_loc+1:slash_loc]
+    if top_domain not in TLDs:
+        TLDs[top_domain] = len(TLDs)
+    top_domain = TLDs[top_domain]
+
+    return url_length, n_digits, top_domain
 
 def convert_tokens_to_ints(tokens):
     """

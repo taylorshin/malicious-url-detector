@@ -19,8 +19,7 @@ def build_model(vocab_size, largest_vector_len, emb_dim=128, lstm_units=128, lr=
     # TODO: Experiment with conv layer
 
     # LSTM layer
-    # TODO: Adding layers.Bidirectional(layers.LSTM...)) may be helpful?
-    model.add(layers.LSTM(lstm_units, recurrent_dropout=dropout_rate))# input_shape=(largest_vector_len, 4)))
+    model.add(layers.LSTM(lstm_units, recurrent_dropout=dropout_rate)) # input_shape=(largest_vector_len, 4)))
     model.add(layers.Dropout(dropout_rate))
 
     # Output layer
