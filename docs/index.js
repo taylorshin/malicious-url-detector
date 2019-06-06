@@ -6,6 +6,7 @@ const LARGEST_VEC_LEN = 89;
 var wordDict = null;
 var tokenDict = null;
 var model = null;
+var gauge = null;
 
 async function loadModel() {
     console.log('Loading model...');
@@ -60,7 +61,8 @@ function tokenize(dict, url) {
 }
 
 function padArray(arr, len, fill) {
-    return arr.concat(Array(len).fill(fill)).slice(0,len);
+    arr_len = arr.length
+    return (Array(len).fill(fill).slice(0,len-arr_len)).concat(arr);
 }
         
 function predict(model, wordDict, tokenDict, url) {
@@ -104,6 +106,7 @@ function showPrediction() {
         box.style.borderColor = 'red';
     }
     box.style.visibility = "visible";
+    gauge.set(3000 * prediction); // set actual value
 }
 
 const opts = {
@@ -122,15 +125,16 @@ const opts = {
     strokeColor: '#E0E0E0',  // to see which ones work best for you
     generateGradient: true,
     highDpiSupport: true,     // High resolution support
+    percentColors: [[0.0, "#00bb00" ], [0.50, "#f9c802"], [1.0, "#ff0000"]]
 };
 
 $(document).ready(function() {
     var target = document.getElementById('canvas'); // your canvas element
-    var gauge = new Gauge(target).setOptions(opts); // create sexy gauge!
+    gauge = new Gauge(target).setOptions(opts); // create sexy gauge!
     gauge.maxValue = 3000; // set max gauge value
     gauge.setMinValue(0);  // Prefer setter over gauge.minValue = 0
     gauge.animationSpeed = 32; // set animation speed (32 is default value)
-    gauge.set(850); // set actual value
+    gauge.set(0); // set actual value
 
     var form = document.getElementById('form');
     function handleForm(event) {
