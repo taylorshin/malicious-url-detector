@@ -4,6 +4,10 @@ body {
     margin: auto;
 }
 
+canvas {
+    display: inline-block;
+}
+
 #prediction-box {
     width: 500px;
     margin: 20px auto;

@@ -1,6 +1,5 @@
 # Custom
 out/
-*.bin
 .DS_Store
 *.pkl
 venv/
