@@ -1,3 +1,4 @@
+import json
 import argparse
 import numpy as np
 import tensorflow as tf
@@ -37,6 +38,9 @@ def main():
     # Cache/load tokens
     tokens = load_or_get_tokens(corpus)
     X, vocab_size, largest_vector_len, token_dict = convert_tokens_to_ints(tokens)
+    # Save token dictionary for website use
+    # with open('token_dict.json', 'w') as f:
+    #     f.write(json.dumps(token_dict))
 
     X = tf.keras.preprocessing.sequence.pad_sequences(X, maxlen=largest_vector_len)
     # X_features = [extract_features(url) for url in corpus]

@@ -11,7 +11,8 @@ from dataset import load_data, get_tokens, load_or_get_tokens, convert_tokens_to
 from model import build_model
 from constants import LOSS_PLOT_FILE, ACC_PLOT_FILE, MODEL_FILE, LOG_DIR, OUT_DIR
 
-def train(batch_size, epochs, emb_dim=128, lstm_units=128, model_file=MODEL_FILE):
+# def train(batch_size, epochs, lr, dropout_rate, model_file=MODEL_FILE):
+def train(batch_size, epochs, model_file=MODEL_FILE, emb_dim=128, lstm_units=128):
     data = load_data('data.csv')
 
     # Labels
@@ -52,7 +53,7 @@ def train(batch_size, epochs, emb_dim=128, lstm_units=128, model_file=MODEL_FILE
     
     # TODO: figure out whether to monitor ACC or LOSS
     callbacks = [
-        tf.keras.callbacks.ModelCheckpoint(model_file, monitor='loss', save_best_only=True, save_weights_only=True),
+        tf.keras.callbacks.ModelCheckpoint(model_file, monitor='loss', save_best_only=True), #, save_weights_only=True),
         tf.keras.callbacks.EarlyStopping(monitor='loss', patience=10, verbose=1),
         tf.keras.callbacks.TensorBoard(log_dir=LOG_DIR, histogram_freq=0)
     ]
@@ -77,8 +78,8 @@ def logistic_regression():
 def main():
     parser = argparse.ArgumentParser(description='Trains the model')
     parser.add_argument('--debug', default=False, type=bool, help='Debug mode')
-    parser.add_argument('--batch-size', default=16, type=int, help='Size of training batch')
-    parser.add_argument('--epochs', default=100, type=int, help='Number of epochs to train for')
+    parser.add_argument('--batch-size', default=32, type=int, help='Size of training batch')
+    parser.add_argument('--epochs', default=10, type=int, help='Number of epochs to train for')
     args = parser.parse_args()
 
     if args.debug:
@@ -111,23 +112,23 @@ def main():
 
     """
     ### Hyperparameter search ###
-    # lrs = [1e-3, 1e-4, 1e-5]
+    lrs = [1e-3, 1e-4, 1e-5]
     # emb_dim_list = [16, 32, 64, 128, 256]
-    emb_dim_list = [32, 64, 128]
+    # emb_dim_list = [32, 64, 128]
     # lstm_units_list = [16, 32, 64, 128, 256]
-    lstm_units_list = [32, 64, 128]
-    # dropout_rate_list = [0.25, 0.5, 0.75]
+    # lstm_units_list = [32, 64, 128]
+    dropout_rate_list = [0.25, 0.5, 0.75]
 
     train_losses = []
     val_losses = []
 
-    for emb_dim in emb_dim_list:
-        for lstm_units in lstm_units_list:
-            print('EMB DIM: {}, LSTM UNITS: {}'.format(emb_dim, lstm_units))
-            param_str = str(emb_dim) + '_' + str(lstm_units)
+    for lr in lrs:
+        for dropout_rate in dropout_rate_list:
+            print('LR: {}, DR: {}'.format(lr, dropout_rate))
+            param_str = 'lr' + str(lr) + '_dr' + str(dropout_rate)
             # Train the model
             model_file = os.path.join(OUT_DIR, 'model_' + param_str + '.h5')
-            history = train(args.batch_size, args.epochs, emb_dim, lstm_units, model_file)
+            history = train(args.batch_size, args.epochs, lr, dropout_rate, model_file)
             train_losses.append(history.history['loss'][-1])
             val_losses.append(history.history['val_loss'][-1])
             print('Train losses: ', train_losses)
@@ -136,6 +137,7 @@ def main():
             val_loss = history.history['val_loss']
             epochs = range(len(train_loss))
             # Plot and save
+            plt.figure()
             plt.plot(epochs, train_loss, label='Training Loss', color='blue')
             plt.plot(epochs, val_loss, label='Validation Loss', color='red')
             plt.title('Loss')
