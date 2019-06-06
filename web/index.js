@@ -3,12 +3,13 @@ const TOTAL_NUM_WORDS = 515572.0;
 const VOCAB_SIZE = 116085;
 const LARGEST_VEC_LEN = 89;
 
-wordDict = 0;
-tokenDict = 0;
+var wordDict = null;
+var tokenDict = null;
+var model = null;
 
 async function loadModel() {
     console.log('Loading model...');
-    const model = await tf.loadLayersModel('model.json');
+    model = await tf.loadLayersModel('model.json');
     console.log('Model loaded.')
     return model;
 }
@@ -81,15 +82,14 @@ function predict(model, wordDict, tokenDict, url) {
     pad_int_seq = [pad_int_seq]
     const x = tf.tensor2d(pad_int_seq);
     console.log('x:', x);
-    return model.predict(x);
+    result = model.predict(x);
+    return result.dataSync();
 }
 
 function showPrediction() {
     url = document.getElementById('url').value;
-    model = loadModel();
-
     const prediction = predict(model, wordDict, tokenDict, url);
-    console.log('Prediction received!');
+    console.log('Prediction received! Probability: ' + prediction);
 
     const box = document.getElementById('prediction-box');
     const resultText = document.getElementById('prediction-result');
@@ -141,7 +141,6 @@ $(document).ready(function() {
 
 loadModel().then((model) => {
     console.log('Model: ', model);
-    let wordDict, tokenDict;
     $.when(
         $.getJSON('word_dict.json', (dict) => {
             wordDict = dict;
@@ -152,7 +151,12 @@ loadModel().then((model) => {
     ).then(() => {
         // let tokens = tokenize(dict, 'realinnovation.com/css/menu.js');
         // console.log('Tokens:', tokens);
+
+        // Start allowing predictions from textbox
+        document.getElementById('submit_button').disabled = false;
+        document.getElementById('loading').style.visibility = 'hidden';
+
         let pred = predict(model, wordDict, tokenDict, 'realinnovation.com/css/menu.js');
-        console.log('Prediction:', pred.dataSync());
+        console.log('Prediction:', pred);
     });
 });
