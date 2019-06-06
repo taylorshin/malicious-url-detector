@@ -13,7 +13,7 @@
     <h1>Malicious URL Detector</h1>
     <form id="form">
         <label for="url">Enter a URL:</label>
-        <input style="width: 600px;" type="text" id="url">
+    <input style="width: 600px;" type="text" id="url"> <!-- onkeydown="showPrediction();" -->
         <input type="submit" onclick="showPrediction();" id="submit_button" disabled>
     </form>
 
@@ -25,8 +25,13 @@
     </div>
 
     <div style="text-align: center;">
-    <canvas id="canvas" width=500 height=300></canvas>
+        <canvas id="canvas" width=500 height=300></canvas>
     </div>
+
+    <p style="color: white;">Samples:<br>
+        blog.lib.umn.edu/raim0007/wost3307/4_women_of_color_filmmakers/<br>
+        j592933.myjino.ru/mad/lib/zs.dll
+    </p>
 </body>
 </html>
 
