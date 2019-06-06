@@ -9,11 +9,12 @@
     <script src="gauge.min.js"></script>
     <script src="index.js"></script>
 </head>
-<body>
+<body onLoad="onload();">
     <h1>Malicious URL Detector</h1>
-    <form>
+    <form id="form">
         <label for="url">Enter a URL:</label>
         <input style="width: 600px;" type="text" id="url">
+        <input type="submit" onclick="showPrediction();">
     </form>
 
     <div id="prediction-box">
