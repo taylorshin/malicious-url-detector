@@ -37,8 +37,8 @@ def train(batch_size, epochs, model_file=MODEL_FILE, emb_dim=128, lstm_units=128
     X_train, X_val, y_train, y_val = train_test_split(X_train, y_train, test_size=0.25, random_state=42)
 
     # For speed
-    train_size = int(X_train.shape[0] / 4)
-    val_size = int(X_val.shape[0] / 4)
+    train_size = int(X_train.shape[0] / 8)
+    val_size = int(X_val.shape[0] / 8)
     print('Training data size: {}'.format(train_size))
     print('Validation data size: {}'.format(val_size))
     X_train = X_train[:train_size]
@@ -48,7 +48,7 @@ def train(batch_size, epochs, model_file=MODEL_FILE, emb_dim=128, lstm_units=128
 
     print('Training...')
     print('Training data shape:', X_train.shape)
-    model = build_model(vocab_size, largest_vector_len, emb_dim, lstm_units, dropout_rate=0.7)
+    model = build_model(vocab_size, largest_vector_len, emb_dim, lstm_units)
     model.summary()
     
     # TODO: figure out whether to monitor ACC or LOSS
@@ -87,7 +87,7 @@ def main():
         tf.enable_eager_execution()
 
     # Train the model
-    history = train(args.batch_size, args.epochs, emb_dim=8, lstm_units=8)
+    history = train(args.batch_size, args.epochs)
 
     ### Plot training and validation loss over epochs ###
     train_loss = history.history['loss']

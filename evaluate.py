@@ -46,103 +46,36 @@ def main():
     # X_features = [extract_features(url) for url in corpus]
     # X = np.array([[(token, X_features[i][0], X_features[i][1], X_features[i][2]) for token in X[i]] for i in range(len(X))])
 
-    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2) # , random_state=42)
     
     # Use pad_sequences to standardize the lengths
-    test_size = int(X_test.shape[0] / 8)
+    test_size = int(X_test.shape[0])
     print('Test data size: {}'.format(test_size))
     X_test = X_test[:test_size]
     y_test = y_test[:test_size]
 
     # Load the model
-    model = build_or_load_model(args.model, vocab_size, largest_vector_len, emb_dim=8, lstm_units=8)
+    model = build_or_load_model(args.model, vocab_size, largest_vector_len)
     
     print('Evaluating...')
     evaluate(model, X_test, y_test)
-    print()
+    # print()
 
-    test_urls = [
-        'defsnotspam.biz/',
-        'google.com',
-        '174vjaijskjrkjviw4.co.ts',
-        'stackoverflow.com/questions/17394882/add-dimensions-to-a-numpy-array',
-        'cambuihostel.com/tmp/chase/7b2592844f7cc97a0f4150e7a7de3a36/',
-    ]
+    # test_urls = [
+    #     'defsnotspam.biz/',
+    #     'google.com',
+    #     '174vjaijskjrkjviw4.co.ts',
+    #     'stackoverflow.com/questions/17394882/add-dimensions-to-a-numpy-array',
+    #     'cambuihostel.com/tmp/chase/7b2592844f7cc97a0f4150e7a7de3a36/',
+    # ]
 
-    for url in test_urls:
-        print('Test URL: ', url)
-        pred_seq = np.array(encode_url_for_prediction(url, tokens, X, vocab_size, largest_vector_len, token_dict))
-        pred_seq = pred_seq[np.newaxis, ...]
-        pred = model.predict(pred_seq, batch_size=1, verbose=1)
-        print('Prediction value: ', pred[0][0])
-        print()
-
-#     print('\n\n\n\nExample prediction: custom')
-#     prediction_seq = np.array([1, 553, 746, 21, 743, 1, 553, 746, 21, 743, 1, 553, 746, 21, 743, 1, 553, 746, 21, 743, 1, 553, 746, 21, 743, 1, 553, 746, 21, 743, 1, 553, 746, 21, 743, 1, 553, 746, 21, 743, 1, 553, 746, 21, 743, 1, 553, 746, 21, 743, 1, 553, 746, 21, 743, 1, 553, 746, 21, 743, 1, 553, 746, 21, 743, 1, 553, 746, 21, 743, 1, 553, 746, 21, 743, 1, 553, 746, 21, 743, 1, 553, 746, 21, 743, 1, 553, 746, 21, 743, 1, 553, 746, 21, 743, 1, 553, 746, 21, 743, 1, 553, 746, 21, 743, 1, 553, 746, 21, 743, 1, 553, 746, 21, 743, 1, 553, 746, 21, 743, 426, 2351, 452, 1])
-#     prediction_seq = prediction_seq[np.newaxis, ...]
-#     # print('Prediction Sequence Going In:', prediction_seq)
-#     # print('Sequence size:', prediction_seq.shape)
-#     prediction = model.predict(prediction_seq, batch_size=1, verbose=1)
-
-#     print('Prediction value:', prediction[0][0])
-#     if prediction[0][0] < .5:
-#         print('Eh, it\'s probably fine!')
-#     else:
-#         print('Be wary, traveler.')
-    
-
-#     print('\n\n\n\nExample prediction: test data 1')
-#     prediction_seq = np.array([0, 0, 0, 0, 0, 0, 0, 0, 0, 0
-# ,  0, 0, 0, 0, 0, 0, 0, 0, 0, 0
-# ,  0, 0, 0, 0, 0, 0, 0, 0, 0, 0
-# ,  0, 0, 0, 0, 0, 0, 0, 0, 0, 0
-# ,  0, 0, 0, 0, 0, 0, 0, 0, 0, 0
-# ,  0, 0, 0, 0, 0, 0, 0, 0, 0, 0
-# ,  0, 0, 0, 0, 0, 0, 0, 0, 0, 0
-# ,  0, 0, 0, 0, 0, 0, 0, 0, 0, 0
-# ,  0, 0, 0, 0, 0, 0, 0, 0, 0, 0
-# ,  0, 0, 0, 0, 0, 0, 0, 0, 0, 0
-# ,  0, 0, 0, 0, 0, 0, 0, 0, 0, 0
-# ,  0, 0, 0, 0, 0, 0, 188804, 251606,   1463,  51190,
-#   231499, 255416, 211142, 209901])
-#     prediction_seq = prediction_seq[np.newaxis, ...]
-#     # print('Prediction Sequence Going In:', prediction_seq)
-#     # print('Sequence size:', prediction_seq.shape)
-#     prediction = model.predict(prediction_seq, batch_size=1, verbose=1)
-
-#     print('Prediction value:', prediction[0][0])
-#     if prediction[0][0] < .5:
-#         print('Eh, it\'s probably fine!')
-#     else:
-#         print('Be wary, traveler.')
-
-
-
-#     print('\n\n\n\nExample prediction: test data 1')
-#     prediction_seq = np.array([0, 0, 0, 0, 0, 0, 0, 0, 0, 0
-# ,  0, 0, 0, 0, 0, 0, 0, 0, 0, 0
-# ,  0, 0, 0, 0, 0, 0, 0, 0, 0, 0
-# ,  0, 0, 0, 0, 0, 0, 0, 0, 0, 0
-# ,  0, 0, 0, 0, 0, 0, 0, 0, 0, 0
-# ,  0, 0, 0, 0, 0, 0, 0, 0, 0, 0
-# ,  0, 0, 0, 0, 0, 0, 0, 0, 0, 0
-# ,  0, 0, 0, 0, 0, 0, 0, 0, 0, 0
-# ,  0, 0, 0, 0, 0, 0, 0, 0, 0, 0
-# ,  0, 0, 0, 0, 0, 0, 0, 0, 0, 0
-# ,  0, 0, 0, 0, 0, 0, 0, 0, 0, 0
-# ,  0, 0,  40597, 209901,  52869, 186725, 271923, 274684,  13017,  51190,
-#   179116,   8835, 108020, 169832])
-#     prediction_seq = prediction_seq[np.newaxis, ...]
-#     # print('Prediction Sequence Going In:', prediction_seq)
-#     # print('Sequence size:', prediction_seq.shape)
-#     prediction = model.predict(prediction_seq, batch_size=1, verbose=1)
-
-#     print('Prediction value:', prediction[0][0])
-#     if prediction[0][0] < .5:
-#         print('Eh, it\'s probably fine!')
-#     else:
-#         print('Be wary, traveler.')
-
+    # for url in test_urls:
+    #     print('Test URL: ', url)
+    #     pred_seq = np.array(encode_url_for_prediction(url, tokens, X, vocab_size, largest_vector_len, token_dict))
+    #     pred_seq = pred_seq[np.newaxis, ...]
+    #     pred = model.predict(pred_seq, batch_size=1)
+    #     print('Prediction value: ', pred[0][0])
+    #     print()
 
 if __name__ == '__main__':
     main()
