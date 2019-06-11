@@ -67,7 +67,6 @@ function padArray(arr, len, fill) {
         
 function predict(model, wordDict, tokenDict, url) {
     let tokens = tokenize(wordDict, url);
-    console.log('tokens:', tokens);
     let int_seq = [];
     for (let token in tokens) {
         if (tokenDict.hasOwnProperty(token)) {
@@ -78,12 +77,9 @@ function predict(model, wordDict, tokenDict, url) {
         }
     }
     // Pad array
-    console.log('before:', int_seq);
     let pad_int_seq = padArray(int_seq, LARGEST_VEC_LEN, 0);
-    console.log('after:',pad_int_seq);
     pad_int_seq = [pad_int_seq]
     const x = tf.tensor2d(pad_int_seq);
-    console.log('x:', x);
     result = model.predict(x);
     return result.dataSync();
 }
@@ -160,7 +156,7 @@ loadModel().then((model) => {
         document.getElementById('submit_button').disabled = false;
         document.getElementById('loading').style.visibility = 'hidden';
 
-        let pred = predict(model, wordDict, tokenDict, 'realinnovation.com/css/menu.js');
-        console.log('Prediction:', pred);
+        // let pred = predict(model, wordDict, tokenDict, 'realinnovation.com/css/menu.js');
+        // console.log('Prediction:', pred);
     });
 });
