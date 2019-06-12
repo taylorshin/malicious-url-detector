@@ -7,7 +7,7 @@ MODEL_FNAME = 'take2-model.h5'
 LOSS_PLOT_FNAME = 'take2-loss.png'
 ACC_PLOT_FNAME = 'take2-accuracy.png'
 
-training_fraction = 0.2
+training_fraction = 1
 test_split = 0.1
 kfolds_splits = 5
 kfolds_repeats = 3

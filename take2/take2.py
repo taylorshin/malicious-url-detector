@@ -66,7 +66,7 @@ model.compile(loss='binary_crossentropy',
               optimizer='rmsprop',
               metrics=['accuracy'])
 
-x_train, x_test, y_train, y_test = train_test_split(x, y, test_size=test_split, stratify=y, random_state=97)
+x_train, x_test, y_train, y_test = train_test_split(x, y, test_size=test_split, stratify=y)
 x_train = x_train[:int(x_train.shape[0] * training_fraction)]
 y_train = y_train[:int(y_train.shape[0] * training_fraction)]
 

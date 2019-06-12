@@ -46,7 +46,7 @@ x = [url.split('.') for url in x]
 x = convert_tokens_to_ints(x, max_features, max_tokens=max_num_tokens)
 y = np.array([1 if label == 'bad' else 0 for label in y])
 
-x_train, x_test, y_train, y_test = train_test_split(x, y, test_size=test_split, stratify=y, random_state=97)
+x_train, x_test, y_train, y_test = train_test_split(x, y, test_size=test_split, stratify=y)
 x_train = x_train[:int(x_train.shape[0] * training_fraction)]
 y_train = y_train[:int(y_train.shape[0] * training_fraction)]
 
