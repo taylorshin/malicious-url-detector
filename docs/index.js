@@ -74,7 +74,7 @@ function convert_tokens_to_ints(tokens) {
     // Assumes tokens is array of tokens for single URL
     let int_seq = [];
     tokens.forEach(function(token) {
-        if (tokenDict.hasOwnProperty(token)) {
+        if (!(tokenDict.hasOwnProperty(token))) {
             tokenDict[token] = Object.keys(tokenDict).length;
         }
         int_seq.push(tokenDict[token] % MAX_FEATURES);
