@@ -1,10 +1,10 @@
-const MAX_WORD_LENGTH = 45;
-const TOTAL_NUM_WORDS = 515572.0;
-const VOCAB_SIZE = 116085;
-const LARGEST_VEC_LEN = 89;
+const MAX_WORD_LENGTH = 20;       // from Viterbi stuff: MAX_WORD_LENGTH
+const TOTAL_NUM_WORDS = 222148;   // from Viterbi stuff: TOTAL_NUM_WORDS
+const LARGEST_VEC_LEN = 32;       // from constants: max_num_tokens
+const MAX_FEATURES = 8192;        // from constants: max_features
 
-var wordDict = null;
-var tokenDict = null;
+var wordDict = null;              // from Viterbi stuff: dictionary
+var tokenDict = null;             // from convert_tokens_to_ints: token_dict
 var model = null;
 var gauge = null;
 
@@ -19,73 +19,90 @@ function wordProb(dict, word) {
     return dict.hasOwnProperty(word) ? (dict[word] / TOTAL_NUM_WORDS) : 0;
 }
 
-function viterbiSegment(dict, text) {
-    let probs = [1.0];
-    let lasts = [0];
-    for(let i = 1; i < text.length + 1; i++) {
-        let prob_k_arr = [];
-        let k_arr = [];
-        for(let j = Math.max(0, i - MAX_WORD_LENGTH); j < i; j++) {
-            prob_k_arr.push(probs[j] * wordProb(dict, text.slice(j, i)));
-            k_arr.push(j);
-        }
-        // console.log('Max prob k:', Math.max(...prob_k_arr));
-        let maxVal = Math.max(...prob_k_arr);
-        let indexOfMaxVal = prob_k_arr.indexOf(maxVal);
-        probs.push(Math.max(...prob_k_arr));
-        lasts.push(k_arr[indexOfMaxVal]);
-    }
-    let words = [];
-    let i = text.length;
-    while (i > 0) {
-        words.push(text.slice(lasts[i], i));
-        i = lasts[i];
-    }
-    reversed = words.reverse();
-    return [reversed, probs.slice(-1)[0]]
-}
+function viterbiSegment(dict, url) {
+    let split_url = url.split(/\/|\-|\.|\&|\?|\=|\_/);
+    let results = [];
 
-function tokenize(dict, url) {
-    let tokens = url.split(new RegExp('[-/.&?=_]', 'g'));
-    let tokensNew = [];
-    tokens.forEach((token, index) => {
-        let [wordSplit, prob] = viterbiSegment(dict, token);
-        if (wordSplit.length < 4) {
-            tokensNew = tokensNew.concat(wordSplit.slice(0, wordSplit.length));
+    split_url.forEach(function(text) {
+        let probs = [1.0];
+        let lasts = [0];
+        for(let i = 1; i < text.length + 1; i++) {
+            let prob_k_arr = [];
+            let k_arr = [];
+            for(let j = Math.max(0, i - MAX_WORD_LENGTH); j < i; j++) {
+                prob_k_arr.push(probs[j] * wordProb(dict, text.slice(j, i)));
+                k_arr.push(j);
+            }
+            let maxVal = Math.max(...prob_k_arr);
+            let indexOfMaxVal = prob_k_arr.indexOf(maxVal);
+            probs.push(Math.max(...prob_k_arr));
+            lasts.push(k_arr[indexOfMaxVal]);
+        }
+        let words = [];
+        let i = text.length;
+        while (i > 0) {
+            words.push(text.slice(lasts[i], i));
+            i = lasts[i];
+        }
+        let reversed = words.reverse();
+
+        let singles = 0;
+        reversed.forEach(function(word) {
+            if (word.length === 1) {
+                singles++;
+            }
+        });
+
+        let result = '';
+        if (singles === words.length) {
+            result = reversed.join('');
+        }
+        else if (singles > 3) {
+            result = reversed.join('');
         }
         else {
-            tokensNew.push(token);
+            result = reversed.join('.');
         }
+        results.push(result);
     });
-    return tokensNew;
+
+    let joined = results.join('.');
+    return joined.split('.');
+}
+
+function convert_tokens_to_ints(tokens) {
+    // Assumes tokens is array of tokens for single URL
+    let int_seq = [];
+    tokens.forEach(function(token) {
+        if (tokenDict.hasOwnProperty(token)) {
+            tokenDict[token] = Object.keys(tokenDict).length;
+        }
+        int_seq.push(tokenDict[token] % MAX_FEATURES);
+    });
+    let x = padArray(int_seq, LARGEST_VEC_LEN, 0);
+    return x;
 }
 
 function padArray(arr, len, fill) {
-    arr_len = arr.length
-    return (Array(len).fill(fill).slice(0,len-arr_len)).concat(arr);
-}
-        
-function predict(model, wordDict, tokenDict, url) {
-    let tokens = tokenize(wordDict, url);
-    let int_seq = [];
-    for (let token in tokens) {
-        if (tokenDict.hasOwnProperty(token)) {
-            int_seq.push(tokenDict[token]);
-        }
-        else {
-            int_seq.push(0);
-        }
+    let arr_len = arr.length;
+    if (arr.length > len) {
+        return arr.slice(0, len);
     }
-    // Pad array
-    let pad_int_seq = padArray(int_seq, LARGEST_VEC_LEN, 0);
-    pad_int_seq = [pad_int_seq]
-    const x = tf.tensor2d(pad_int_seq);
-    result = model.predict(x);
+    else {
+        return (Array(len).fill(fill).slice(0,len-arr_len)).concat(arr);
+    }
+}
+
+function predict(model, wordDict, tokenDict, url) {
+    let tokens = viterbiSegment(wordDict, url);
+    let int_seq = convert_tokens_to_ints(tokens);
+    const x = tf.tensor2d(int_seq);
+    let result = model.predict(x);
     return result.dataSync();
 }
 
 function showPrediction() {
-    url = document.getElementById('url').value;
+    let url = document.getElementById('url').value;
     const prediction = predict(model, wordDict, tokenDict, url);
     console.log('Prediction received! Probability: ' + prediction);
 
@@ -126,7 +143,7 @@ const opts = {
 
 $(document).ready(function() {
     var target = document.getElementById('canvas'); // your canvas element
-    gauge = new Gauge(target).setOptions(opts); // create sexy gauge!
+    gauge = new Gauge(target).setOptions(opts); // create gauge!
     gauge.maxValue = 3000; // set max gauge value
     gauge.setMinValue(0);  // Prefer setter over gauge.minValue = 0
     gauge.animationSpeed = 32; // set animation speed (32 is default value)
@@ -149,14 +166,8 @@ loadModel().then((model) => {
             tokenDict = dict;
         })
     ).then(() => {
-        // let tokens = tokenize(dict, 'realinnovation.com/css/menu.js');
-        // console.log('Tokens:', tokens);
-
         // Start allowing predictions from textbox
         document.getElementById('submit_button').disabled = false;
         document.getElementById('loading').style.visibility = 'hidden';
-
-        // let pred = predict(model, wordDict, tokenDict, 'realinnovation.com/css/menu.js');
-        // console.log('Prediction:', pred);
     });
 });
