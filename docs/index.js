@@ -96,7 +96,7 @@ function padArray(arr, len, fill) {
 function predict(model, wordDict, tokenDict, url) {
     let tokens = viterbiSegment(wordDict, url);
     let int_seq = convert_tokens_to_ints(tokens);
-    const x = tf.tensor2d(int_seq);
+    const x = tf.tensor2d([int_seq]);
     let result = model.predict(x);
     return result.dataSync();
 }
